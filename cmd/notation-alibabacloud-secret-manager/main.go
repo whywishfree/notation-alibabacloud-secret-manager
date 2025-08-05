@@ -19,12 +19,14 @@ import (
 	"os"
 
 	"github.com/notaryproject/notation-plugin-framework-go/cli"
+
+	notationplugin "github.com/AliyunContainerService/notation-alibabacloud-secret-manager/plugin"
 )
 
 func main() {
 	ctx := context.Background()
 	// Initialize plugin
-	plugin, err := NewAlibabaCloudSecretManagerPlugin()
+	plugin, err := notationplugin.NewAlibabaCloudSecretManagerPlugin()
 	if err != nil {
 		_, _ = fmt.Fprintf(os.Stderr, "failed to initialize plugin: %v\n", err)
 		os.Exit(2)

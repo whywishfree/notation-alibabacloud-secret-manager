@@ -9,6 +9,7 @@ import (
 	"encoding/pem"
 	"errors"
 	"fmt"
+	"github.com/AliyunContainerService/notation-alibabacloud-secret-manager/types"
 	"io"
 	"math/big"
 	"os"
@@ -36,10 +37,11 @@ const (
 )
 
 type KmsPrivateKeySigner struct {
-	client    *dedicatedkmssdk.Client
-	publicKey crypto.PublicKey
-	keyId     string
-	algorithm string
+	client       types.ClientProvider
+	publicKey    crypto.PublicKey
+	keyId        string
+	keyVersionId string
+	algorithm    string
 }
 
 func (ks *KmsPrivateKeySigner) Public() crypto.PublicKey {
@@ -47,17 +49,17 @@ func (ks *KmsPrivateKeySigner) Public() crypto.PublicKey {
 }
 
 func (ks *KmsPrivateKeySigner) Sign(rand io.Reader, digest []byte, opts crypto.SignerOpts) (signature []byte, err error) {
-	request := &dedicatedkmssdk.SignRequest{
-		KeyId:       tea.String(ks.keyId),
-		Message:     digest,
-		MessageType: tea.String("DIGEST"),
-		Algorithm:   tea.String(ks.algorithm),
+	request := &types.SignRequest{
+		KeyId:       ks.keyId,
+		Payload:     digest,
+		MessageType: "DIGEST",
+		Algorithm:   ks.algorithm,
 	}
-	resp, err := ks.client.Sign(request)
+	sig, err := ks.client.GenerateSignature(request)
 	if err != nil {
 		return nil, err
 	}
-	return resp.Signature, nil
+	return []byte(sig), nil
 }
 
 func genSerialNum() (*big.Int, error) {
@@ -69,7 +71,7 @@ func genSerialNum() (*big.Int, error) {
 	return serialNum, nil
 }
 
-func GetCertDataFromKey(dkmsClient *dedicatedkmssdk.Client, pub *rsa.PublicKey, keyId string) ([]byte, error) {
+func GetCertDataFromKey(clientProvider types.ClientProvider, pub *rsa.PublicKey, keyId, keyVersionId string) ([]byte, error) {
 	//init csr subject
 	subject := pkix.Name{
 		Country:            []string{"CN"},
@@ -80,10 +82,11 @@ func GetCertDataFromKey(dkmsClient *dedicatedkmssdk.Client, pub *rsa.PublicKey, 
 
 	//Create kms service signer object
 	priv := &KmsPrivateKeySigner{
-		client:    dkmsClient,              //kms client
-		keyId:     keyId,                   //kms instance asymmetric key Id
-		publicKey: pub,                     //kms instance asymmetric public key
-		algorithm: KMS_ALG_RSA_PSS_SHA_256, //kms instance signing algorithm, RSA_PKCS1_SHA_256 is not conform with notation specification
+		client:       clientProvider, //kms client
+		keyId:        keyId,          //kms instance asymmetric key Id
+		keyVersionId: keyVersionId,
+		publicKey:    pub,                     //kms instance asymmetric public key
+		algorithm:    KMS_ALG_RSA_PSS_SHA_256, //kms instance signing algorithm, RSA_PKCS1_SHA_256 is not conform with notation specification
 	}
 
 	serialNum, err := genSerialNum()
@@ -110,31 +113,6 @@ func GetCertDataFromKey(dkmsClient *dedicatedkmssdk.Client, pub *rsa.PublicKey, 
 		return nil, err
 	}
 	return certBytes, nil
-}
-
-func GetPublicKey(client *dedicatedkmssdk.Client, keyId string) (*rsa.PublicKey, error) {
-	request := &dedicatedkmssdk.GetPublicKeyRequest{
-		KeyId: tea.String(keyId),
-	}
-	response, err := client.GetPublicKey(request)
-	if err != nil {
-		return nil, err
-	}
-	block, _ := pem.Decode([]byte(*response.PublicKey))
-	if block == nil || block.Type != "PUBLIC KEY" {
-		return nil, errors.New("failed to decode public key")
-	}
-	pub, err := x509.ParsePKIXPublicKey(block.Bytes)
-	if err != nil {
-		return nil, err
-	}
-	//return rsa public key
-	rsaPub, ok := pub.(*rsa.PublicKey)
-	if !ok {
-		return nil, errors.New(fmt.Sprintf("unsupport public key type %T", pub))
-	}
-
-	return rsaPub, nil
 }
 
 // CertDataOutput perisist certificate data to file
