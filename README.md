@@ -15,13 +15,13 @@ This document demonstrates how to sign and verify an OCI artifact with Alibaba C
 
 #### Plugin Spec Compatibility
 
-| Capability       | Compatibility                                                |
-| ---------------- | ------------------------------------------------------------ |
-| keySpec          | `RSA-2048`, `RSA-3072`, `EC-256`                             |
-| hashAlgorithm    | `SHA-256`                                                    |
-| signingAlgorithm | `RSASSA-PSS-SHA-256`                                         |
+| Capability       | Compatibility                                              |
+| ---------------- | ---------------------------------------------------------- |
+| keySpec          | `RSA-2048`, `EC-256`                             |
+| hashAlgorithm    | `SHA-256`                                                  |
+| signingAlgorithm | `RSASSA-PSS-SHA-256`                                       |
 | pluginCapability | `SIGNATURE_GENERATOR.RAW`, `SIGNATURE_VERIFIER.TRUSTED_IDENTITY`, `SIGNATURE_VERIFIER.REVOCATION_CHECK` |
-| signingScheme    | `notary.x509`                                                |
+| signingScheme    | `notary.x509`                                              |
 
 
 
@@ -31,16 +31,13 @@ The following summarizes the steps to configure the notation-alibabacloud-secret
 
 - Install notation [CLI](https://github.com/notaryproject/notation/releases/tag/v1.1.1). Version v1.1.1 has been tested. Note that `make install` creates the plugin directory structure based on a MacOS environment. Update the Makefile based on your OS. It then copies the plugin to the appropriate location based on the notation plugin directory structure spec.
 
-- This plugin leverages the [KMS Instance SDK](https://www.alibabacloud.com/help/en/kms/developer-reference/kms-instance-sdk-for-go/), which means you'll need to meet the pre-requisites and customize the environment as follows：
+- To use this plugin, you need to define the following environment variables:
 
-| Env                                  | Description                                                  |
-| ------------------------------------ | ------------------------------------------------------------ |
-| ALIBABA_CLOUD_ACCESS_KEY_ID          | Alibaba Cloud Account Access Key ID                          |
-| ALIBABA_CLOUD_ACCESS_KEY_SECRET      | Alibaba Cloud Account Secret Access Key                      |
-| ALIBABA_CLOUD_KMS_INSTANCE_ENDPOINT  | VPC Endpoint of the Dedicated KMS Instance, for example, kst-hzxxxxxxxxxx.cryptoservice.kms.aliyuncs.com |
-| ALIBABA_CLOUD_KMS_CLIENTKEY_FILEPATH | Local File Path of the ClientKey Credential for the Dedicated KMS Instance Application Access Point (AAP) |
-| ALIBABA_CLOUD_KMS_PASSWORD           | Password for the Dedicated KMS Instance Application Access Point (AAP) |
-| ALIBABA_CLOUD_KMS_CA_FILEPATH        | Local Path of the CA Certificate for the Dedicated KMS Instance |
+| Env                                 | Description                                                  |
+| ----------------------------------- | ------------------------------------------------------------ |
+| ALIBABA_CLOUD_ACCESS_KEY_ID         | Alibaba Cloud Account Access Key ID                          |
+| ALIBABA_CLOUD_ACCESS_KEY_SECRET     | Alibaba Cloud Account Secret Access Key                      |
+| ALIBABA_CLOUD_KMS_INSTANCE_ENDPOINT | Supports both KMS dedicated instance Endpoint and shared gateway Endpoint.  <br />**Dedicated instance Endpoint example**: kst-hzxxxxxxxxxx.cryptoservice.kms.aliyuncs.com<br />   **Shared gateway Endpoint example**: kms.cn-hangzhou.aliyuncs.com   <br />For more information about the differences between accessing via a dedicated gateway and a shared gateway, please refer to [**Differences between shared and dedicated gateways for accessing KMS**](https://www.alibabacloud.com/help/en/kms/key-management-service/developer-reference/classic-kms-sdkclassic-kms-sdk/#26484656d84ey) |
 
 *Note: the notation-alibabacloud-secret-manager plugin supports various Credential configuration methods. For more details, please refer to [credentials](https://aliyuncontainerservice.github.io/ack-ram-tool/#credentials)*
 
@@ -79,7 +76,7 @@ Users can [create a key](https://help.aliyun.com/en/kms/key-management-service/u
 
 2. On the **Keys** page, click the **Default Key** tab.
 
-3. In the Create Keys panel, complete the configuration settings, noting that you need to select **Asymmetric Keys** for Key Type, **SIGN/VERIFY** for Key Usage,  and select the key specifications supported by Plugin Spec Compatibility above (`RSA-2048`, `RSA-3072`, `EC-256`), and then click OK.
+3. In the Create Keys panel, complete the configuration settings, noting that you need to select **Asymmetric Keys** for Key Type, **SIGN/VERIFY** for Key Usage,  and select the key specifications supported by Plugin Spec Compatibility above (`RSA-2048`, `EC-256`), and then click OK.
 
 
 

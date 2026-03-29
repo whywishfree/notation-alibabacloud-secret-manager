@@ -13,13 +13,13 @@
 
 #### 插件规范兼容性
 
-| Capability       | Compatibility                                                |
-| ---------------- | ------------------------------------------------------------ |
-| keySpec          | `RSA-2048`, `RSA-3072`, `EC-256`                             |
-| hashAlgorithm    | `SHA-256`                                                    |
-| signingAlgorithm | `RSASSA-PSS-SHA-256`                                         |
+| Capability       | Compatibility                                       |
+| ---------------- | --------------------------------------------------- |
+| keySpec          | `RSA-2048`, `EC-256`                             |
+| hashAlgorithm    | `SHA-256`                                           |
+| signingAlgorithm | `RSASSA-PSS-SHA-256`                                |
 | pluginCapability | `SIGNATURE_GENERATOR.RAW`, `SIGNATURE_VERIFIER.TRUSTED_IDENTITY`, `SIGNATURE_VERIFIER.REVOCATION_CHECK` |
-| signingScheme    | `notary.x509`                                                |
+| signingScheme    | `notary.x509`                                       |
 
 
 
@@ -29,20 +29,17 @@
 
 下面总结了配置 notation-alibabacloud-secret-manager 插件以及容器镜像签名和验签的步骤。
 
-- 安装Notation [CLI](https://github.com/notaryproject/notation/releases/tag/v1.1.1)。版本 v1.1.1 已通过测试。请注意，“make install ”会根据 MacOS 环境创建插件目录结构。请根据您的操作系统更新 Makefile。然后，它会根据符号插件目录结构规范将插件复制到适当的位置。
+- 安装Notation [CLI](https://github.com/notaryproject/notation/releases/tag/v1.3.2)。版本 v1.3.2 已通过测试。请注意，“make install ”会根据 MacOS 环境创建插件目录结构。请根据您的操作系统更新 Makefile。然后，它会根据符号插件目录结构规范将插件复制到适当的位置。
 
-- 本插件使用 [KMS Instance SDK](https://www.alibabacloud.com/help/en/kms/developer-reference/kms-instance-sdk-for-go/)，您需要满足以下先决条件并自定义环境变量：
+- 使用本插件您需要自定义以下环境变量：
 
 
 
-| 环境变量                             | 描述                                                         |
-| ------------------------------------ | ------------------------------------------------------------ |
-| ALIBABA_CLOUD_ACCESS_KEY_ID          | 阿里云账户Access Key ID                                      |
-| ALIBABA_CLOUD_ACCESS_KEY_SECRET      | 阿里云账号Access Secret Key                                  |
-| ALIBABA_CLOUD_KMS_INSTANCE_ENDPOINT  | 指定KMS专属实例的VPC Endpoint，比如：kst-hzxxxxxxxxxx.cryptoservice.kms.aliyuncs.com |
-| ALIBABA_CLOUD_KMS_CLIENTKEY_FILEPATH | 访问指定KMS专属实例应用接入点（AAP）的ClientKey凭据文件对应的本地文件路径 |
-| ALIBABA_CLOUD_KMS_PASSWORD           | 指定KMS专属实例应用接入点（AAP）的密钥                       |
-| ALIBABA_CLOUD_KMS_CA_FILEPATH        | 指定KMS专属实例CA证书对应的本地文件路径                      |
+| 环境变量                            | 描述                                                         |
+| ----------------------------------- | ------------------------------------------------------------ |
+| ALIBABA_CLOUD_ACCESS_KEY_ID         | 阿里云账户Access Key ID                                      |
+| ALIBABA_CLOUD_ACCESS_KEY_SECRET     | 阿里云账号Access Secret Key                                  |
+| ALIBABA_CLOUD_KMS_INSTANCE_ENDPOINT | 支持KMS专属实例Endpoint和共享网关Endpoint<br />专属实例Endpoint实例：kst-hzxxxxxxxxxx.cryptoservice.kms.aliyuncs.com<br />共享网关Endpoint实例：kms.cn-hangzhou.aliyuncs.com<br />关于专属网关访问和共享网关访问的更多差异，请参见[共享网关和专属网关的差异](https://www.alibabacloud.com/help/zh/kms/key-management-service/developer-reference/classic-kms-sdkclassic-kms-sdk/#d61514b089my8) |
 
 *注意：notation-alibabacloud-secret-manager插件支持多种Credential配置方式。更多的配置方式请参考[credentials](https://aliyuncontainerservice.github.io/ack-ram-tool/#credentials)*
 
@@ -86,7 +83,7 @@ notation plugin add --file ./notation-alibabacloud.secretmanager.plugin
 
 2. 在密钥管理页面，单击用户主密钥页签，实例ID选择软件密钥管理实例，单击创建密钥。
 
-3. 在创建密钥面板，完成配置项设置，注意这里的密钥规格需要选择**非对称密钥**，密钥用途选择**SIGN/VERIFY**，密钥规则选择上文插件规范兼容性里支持的密钥规格（`RSA-2048`, `RSA-3072`, `EC-256`），然后单击确定。
+3. 在创建密钥面板，完成配置项设置，注意这里的密钥规格需要选择**非对称密钥**，密钥用途选择**SIGN/VERIFY**，密钥规则选择上文插件规范兼容性里支持的密钥规格（`RSA-2048`,`EC-256`），然后单击确定。
 
 
 
